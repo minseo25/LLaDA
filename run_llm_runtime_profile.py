@@ -8,7 +8,7 @@ import numpy as np
 from generate import generate as generate_llada
 
 # --- Global Settings ---
-DEVICE = 'cuda:1' if torch.cuda.is_available() else 'cpu'
+DEVICE = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 LLAMA_MODEL_ID = 'meta-llama/Meta-Llama-3-8B-Instruct'
 LLADA_MODEL_ID = 'GSAI-ML/LLaDA-8B-Instruct'
 
