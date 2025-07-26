@@ -1,0 +1,185 @@
+Loading LongBench-v2 dataset for long context prompts...
+Filtering for 'Single-Document QA' domain...
+Searching for samples with context > 4096 tokens...
+Found and selected 5 prompts.
+
+Loading model: meta-llama/Meta-Llama-3-8B-Instruct...
+meta-llama/Meta-Llama-3-8B-Instruct loaded successfully.
+
+--- Profiling Llama-3 Prefill Cost on Long Contexts ---
+
+--- Profiling Llama-3 Decode Cost per Token ---
+
+Profiling for prompt length: 128
+
+Profiling for prompt length: 1024
+
+Profiling for prompt length: 2048
+
+Profiling for prompt length: 4096
+
+--- Profiling Llama-3 End-to-End Latency ---
+
+Profiling for prompt length: 128
+
+Profiling for prompt length: 1024
+
+Profiling for prompt length: 2048
+
+Profiling for prompt length: 4096
+
+
+============================ Llama-3 FINAL RESULTS ============================
+
+
+--------------------------------------------------------------------------------
+
+[ Analysis 1.1: Llama-3 Prefill Cost vs. Prompt Length ]
+Average prefill cost (ms) across 5 long-context samples.
+ prompt_length  avg_runtime_ms
+            32       27.506065
+            64       27.946615
+           128       28.027058
+           256       40.930891
+           512       81.018829
+          1024      173.521805
+          2048      331.910753
+          4096      673.928452
+
+
+--------------------------------------------------------------------------------
+
+[ Analysis 1.2: Llama-3 Per-Token Decode Cost ]
+Time (ms) to generate each subsequent token for different initial prompt lengths.
+
+--- Prompt Length: 128 tokens ---
+ gen_length  runtime_ms
+         32   28.054237
+         64   27.939081
+        128   28.666735
+        256   27.821302
+        512   28.104067
+       1024   28.307199
+       2048   28.147697
+
+--- Prompt Length: 1024 tokens ---
+ gen_length  runtime_ms
+         32   28.247356
+         64   28.220654
+        128   28.210163
+        256   28.557301
+        512   28.426170
+       1024   28.251648
+       2048   28.150558
+
+--- Prompt Length: 2048 tokens ---
+ gen_length  runtime_ms
+         32   28.117657
+         64   28.162241
+        128   28.085709
+        256   28.071404
+        512   28.403044
+       1024   28.404713
+       2048   28.199673
+
+--- Prompt Length: 4096 tokens ---
+ gen_length  runtime_ms
+         32   28.280020
+         64   28.125525
+        128   28.196335
+        256   28.233290
+        512   28.179646
+       1024   28.205395
+       2048   28.674364
+
+--------------------------------------------------------------------------------
+
+[ Analysis 1.3: Llama-3 End-to-End Latency ]
+ prompt_length  gen_length  prefill_ms    decode_ms  total_runtime_ms
+           128          32   28.922796   935.874939        964.797735
+           128          64   26.906729  1862.109661       1889.016390
+           128         128   27.586699  3762.820005       3790.406704
+           128         256   27.134180  7526.015043       7553.149223
+           128         512   27.970791 15066.858053      15094.828844
+           128        1024   26.950836 30098.472834      30125.423670
+           128        2048   26.942253 60958.012104      60984.954357
+          1024          32   51.555872  1163.157463       1214.713335
+          1024          64   51.369905  2105.485439       2156.855345
+          1024         128   51.403284  3985.295773       4036.699057
+          1024         256   51.348209  7750.007391       7801.355600
+          1024         512   51.348686 15311.757565      15363.106251
+          1024        1024   51.416874 30755.695820      30807.112694
+          1024        2048   51.421642 63258.757353      63310.178995
+          2048          32  101.749420  1426.805019       1528.554440
+          2048          64  101.883173  2411.434174       2513.317347
+          2048         128  102.030277  4388.536453       4490.566730
+          2048         256  101.800919  8359.458923       8461.259842
+          2048         512  101.731300 16408.779144      16510.510445
+          2048        1024  102.236509 32877.142429      32979.378939
+          2048        2048  103.809357 67371.876478      67475.685835
+          4096          32  159.367323  2141.304731       2300.672054
+          4096          64  158.352613  3260.592222       3418.944836
+          4096         128  158.875704  5495.719433       5654.595137
+          4096         256  158.218622  9993.764877      10151.983500
+          4096         512  159.202814 19083.975554      19243.178368
+          4096        1024  158.588886 37690.803289      37849.392176
+          4096        2048  158.289433  7879.493952       8037.783384
+
+================================================================================
+Llama-3 analysis complete.
+
+Loading model: GSAI-ML/LLaDA-8B-Instruct...
+GSAI-ML/LLaDA-8B-Instruct loaded successfully.
+
+--- Profiling LLaDA Total Runtime and Step Cost ---
+
+Profiling for prompt length: 141
+
+Profiling for prompt length: 1037
+
+Profiling for prompt length: 2059
+
+
+============================ LLaDA FINAL RESULTS ============================
+
+
+--------------------------------------------------------------------------------
+
+[ Analysis 2.1: LLaDA Total Runtime & Average Step Cost ]
+Total runtime and average cost per step (ms) for different prompt and generation lengths.
+
+--- Prompt Length: ~128 (Actual: 141) tokens ---
+ prompt_length  gen_length  total_runtime_ms  avg_step_ms
+           141          32        680.477142    42.529821
+           141          64       1902.703047    59.459470
+           141         128       4739.374876    74.052732
+           141         256      11813.261032    92.291102
+           141         512      38055.691481   148.655045
+           141        1024     111918.084383   218.590009
+           141        2048     430564.564943   420.473208
+
+--- Prompt Length: ~1024 (Actual: 1037) tokens ---
+ prompt_length  gen_length  total_runtime_ms  avg_step_ms
+          1037          32       3361.150980   210.071936
+          1037          64       6781.332493   211.916640
+          1037         128      14000.001669   218.750026
+          1037         256      34708.324671   271.158786
+          1037         512      75862.623692   296.338374
+          1037        1024     206817.963123   403.941334
+          1037        2048     608745.068550   594.477606
+
+--- Prompt Length: ~2048 (Actual: 2059) tokens ---
+ prompt_length  gen_length  total_runtime_ms  avg_step_ms
+          2059          32       6466.933012   404.183313
+          2059          64      12933.516502   404.172391
+          2059         128      26913.259983   420.519687
+          2059         256      55701.853752   435.170732
+          2059         512     122451.330900   478.325511
+          2059        1024     304316.805124   594.368760
+          2059        2048     815839.061499   796.717833
+
+================================================================================
+LLaDA analysis complete.
+
+
+All profiling complete.

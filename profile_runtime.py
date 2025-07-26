@@ -260,120 +260,78 @@ def main():
 
     # --- Data Loading ---
     temp_tokenizer = AutoTokenizer.from_pretrained(LLAMA_MODEL_ID)
-    # Now we can reliably get the longest prompts
     long_context_prompts = get_longbench_prompts(temp_tokenizer, LONG_PROMPT_COUNT)
-    base_prompt_for_tests = long_context_prompts[0] # The longest prompt is selected
+    base_prompt_for_tests = long_context_prompts[0]
     del temp_tokenizer
 
-    # --- Storages for Results ---
-    llama_prefill_df = pd.DataFrame()
-    llama_decode_results = {}
-    llama_e2e_df = pd.DataFrame()
-    llada_generation_df = pd.DataFrame()
-
-    # --- 1. Llama-3 Analysis (Up to 4K) ---
+    # --- Run Llama-3 Analysis ---
     llama_model, llama_tokenizer = load_model_and_tokenizer(LLAMA_MODEL_ID, AutoModelForCausalLM)
     
     llama_prefill_df = profile_llama_prefill_long_context(llama_model, llama_tokenizer, long_context_prompts, LLAMA_TRUNCATION_LENGTHS)
     llama_decode_results = profile_llama_decode(llama_model, llama_tokenizer, base_prompt_for_tests, LLAMA_PROMPT_LENGTHS_FOR_TEST, MAX_DECODE_LENGTH)
-    # E2E test is performed within Llama's context limit for safety
     llama_e2e_df = profile_llama_e2e_latency(llama_model, llama_tokenizer, base_prompt_for_tests, LLAMA_PROMPT_LENGTHS_FOR_TEST, GEN_LENGTHS_FOR_TEST)
     
+    # --- Print Llama-3 Results Immediately ---
+    pd.set_option('display.width', 150)
+    pd.set_option('display.max_rows', 100)
+    print("\n\n" + "="*28 + " Llama-3 FINAL RESULTS " + "="*28)
+
+    # # 1.1: Prefill Cost
+    print("\n\n" + "-"*80)
+    print("\n[ Analysis 1.1: Llama-3 Prefill Cost vs. Prompt Length ]")
+    print("Average prefill cost (ms) across 5 long-context samples.")
+    print(llama_prefill_df.to_string(index=False))
+
+    # 1.2: Per-Token Decode Cost
+    print("\n\n" + "-"*80)
+    print("\n[ Analysis 1.2: Llama-3 Per-Token Decode Cost ]")
+    print("Time (ms) to generate each subsequent token for different initial prompt lengths.")
+    selected_gen_lengths = [32, 64, 128, 256, 512, 1024, 2048]
+    for p_len, df in llama_decode_results.items():
+        print(f"\n--- Prompt Length: {p_len} tokens ---")
+        # Filter to show only selected generation lengths
+        filtered_df = df[df['gen_length'].isin(selected_gen_lengths)]
+        print(filtered_df.to_string(index=False))
+
+    # 1.3: End-to-End Latency
+    print("\n\n" + "-"*80)
+    print("\n[ Analysis 1.3: Llama-3 End-to-End Latency ]")
+    print(llama_e2e_df.to_string(index=False))
+    
+    print("\n" + "="*80)
+    print("Llama-3 analysis complete.")
+
     del llama_model, llama_tokenizer
     if 'cuda' in DEVICE: torch.cuda.empty_cache()
 
-    # --- 2. LLaDA Analysis (Up to 4K) ---
+    # --- Run LLaDA Analysis ---
     llada_model, llada_tokenizer = load_model_and_tokenizer(LLADA_MODEL_ID, AutoModel)
 
     llada_generation_df = profile_llada_generation(llada_model, llada_tokenizer, base_prompt_for_tests, LLADA_PROMPT_LENGTHS_FOR_TEST, GEN_LENGTHS_FOR_TEST)
     
+    # --- Print LLaDA Results Immediately ---
+    print("\n\n" + "="*28 + " LLaDA FINAL RESULTS " + "="*28)
+
+    # 2.1: Generation Cost
+    print("\n\n" + "-"*80)
+    print("\n[ Analysis 2.1: LLaDA Total Runtime & Average Step Cost ]")
+    print("Total runtime and average cost per step (ms) for different prompt and generation lengths.")
+    for p_len in LLADA_PROMPT_LENGTHS_FOR_TEST:
+        try:
+            range_width = max(30, p_len // 100)
+            actual_prompt_len = llada_generation_df[llada_generation_df['prompt_length'].isin(range(p_len, p_len + range_width))]['prompt_length'].iloc[0]
+            print(f"\n--- Prompt Length: ~{p_len} (Actual: {actual_prompt_len}) tokens ---")
+            print(llada_generation_df[llada_generation_df['prompt_length'] == actual_prompt_len].to_string(index=False))
+        except IndexError:
+            print(f"\n--- No results found for prompt length: ~{p_len} tokens ---")
+    
+    print("\n" + "="*80)
+    print("LLaDA analysis complete.")
+    
     del llada_model, llada_tokenizer
     if 'cuda' in DEVICE: torch.cuda.empty_cache()
 
-    # --- 3. Print All Results ---
-    pd.set_option('display.width', 150)
-    pd.set_option('display.max_rows', 100)
-    print("\n\n" + "="*28 + " FINAL ANALYSIS RESULTS " + "="*28)
-
-    # --- Analysis 1: Prefill Cost ---
-    print("\n\n" + "-"*80)
-    print("\n[ Analysis 1: Llama-3 Prefill Cost vs. Prompt Length ]")
-    print("Average prefill cost (ms) across 5 long-context samples.")
-    print(llama_prefill_df.to_string(index=False))
-
-    # --- Analysis 2: Unit Generation Cost ---
-    print("\n\n" + "-"*80)
-    print("\n[ Analysis 2.1: Llama-3 Per-Token Decode Cost ]")
-    print("Time (ms) to generate each subsequent token for different initial prompt lengths.")
-    for p_len, df in llama_decode_results.items():
-        print(f"\n--- Prompt Length: {p_len} tokens ---")
-        # Display summary for brevity
-        print(df.head())
-        if len(df) > 10:
-            print("...")
-            print(df.tail())
-
-    print("\n\n" + "-"*80)
-    print("\n[ Analysis 2.2: LLaDA Total Runtime & Average Step Cost ]")
-    print("Total runtime and average cost per step (ms) for different prompt and generation lengths.")
-    for p_len in LLADA_PROMPT_LENGTHS_FOR_TEST:
-         # LLaDA prompt length may vary slightly due to chat template, so use actual measured values
-        # Use wider range for longer prompts
-        range_width = max(30, p_len // 100)  # Wider range for longer prompts
-        actual_prompt_len = llada_generation_df[llada_generation_df['prompt_length'].isin(range(p_len, p_len + range_width))]['prompt_length'].iloc[0]
-        print(f"\n--- Prompt Length: ~{p_len} (Actual: {actual_prompt_len}) tokens ---")
-        print(llada_generation_df[llada_generation_df['prompt_length'] == actual_prompt_len].to_string(index=False))
-
-    # --- Analysis 3: End-to-End Latency Comparison ---
-    print("\n\n" + "-"*80)
-    print("\n[ Analysis 3: End-to-End Latency Comparison ]")
-    
-    # Prepare results for comparison
-    llada_e2e_df = llada_generation_df[['prompt_length', 'gen_length', 'total_runtime_ms']].rename(
-        columns={'total_runtime_ms': 'LLaDA_total_ms'}
-    )
-    llama_e2e_df_renamed = llama_e2e_df.rename(columns={'total_runtime_ms': 'Llama-3_total_ms'})
-
-    # Compare for all LLaDA prompt lengths
-    for p_len in LLADA_PROMPT_LENGTHS_FOR_TEST:
-        print(f"\n--- Comparison for Prompt Length: ~{p_len} tokens ---")
-
-        # Get Llama results (empty if length exceeds Llama's limit)
-        llama_subset = llama_e2e_df_renamed[llama_e2e_df_renamed['prompt_length'] == p_len]
-        
-        # Get LLaDA results
-        try:
-            range_width = max(30, p_len // 100)  # Wider range for longer prompts
-            actual_llada_p_len = llada_e2e_df[llada_e2e_df['prompt_length'].isin(range(p_len, p_len + range_width))]['prompt_length'].iloc[0]
-            llada_subset = llada_e2e_df[llada_e2e_df['prompt_length'] == actual_llada_p_len]
-        except IndexError:
-            # LLaDA results not found (theoretically shouldn't happen)
-            llada_subset = pd.DataFrame()
-
-        # Merge results using outer join to show all available data
-        if not llama_subset.empty and not llada_subset.empty:
-            combined_df = pd.merge(
-                llama_subset,
-                llada_subset,
-                on='gen_length',
-                how='outer'
-            )
-        elif not llama_subset.empty:
-            combined_df = llama_subset
-        elif not llada_subset.empty:
-            combined_df = llada_subset
-        else:
-            print("No results found for this prompt length.")
-            continue
-        
-        # Organize columns for display
-        final_cols = ['prompt_length_x', 'prompt_length_y', 'gen_length', 'prefill_ms', 'decode_ms', 'Llama-3_total_ms', 'LLaDA_total_ms']
-        # Filter only existing columns for display
-        display_cols = [col for col in final_cols if col in combined_df.columns]
-        print(combined_df[display_cols].to_string(index=False))
-            
-    print("\n" + "="*80)
-    print("Profiling complete.")
+    print("\n\nAll profiling complete.")
 
 
 if __name__ == '__main__':
