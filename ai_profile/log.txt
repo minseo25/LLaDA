@@ -1,0 +1,291 @@
+# LLaMA-3-8B-Instruct
+
+* prefill(python run_llama_roofline_model.py --input_prompt_length=2048 --sequence_length=0)
+--- Total Runtime Breakdown ---
+Total Runtime: 0.148951 s
+  - FFN Linear Layers: 0.095190 s (63.91%)
+  - MHA Linear Layers: 0.022664 s (15.22%)
+  - MHA Attention: 0.008464 s (5.68%)
+  - Nonlinear Ops: 0.021265 s (14.28%)
+  - Classifier: 0.001368 s (0.92%)
+
+--- Prefill (Prompt) Phase Analysis ---
+Total: 0.148951 s
+Linear AI: 1110.3567
+Attention AI: 1529.7000
+Aggregate AI: 708.9658
+
+
+* decode(python run_llama_roofline_model.py --input_prompt_length=2048 --sequence_length=1)
+--- Total Runtime Breakdown ---
+Total Runtime: 0.168864 s
+  - FFN Linear Layers: 0.109875 s (65.07%)
+  - MHA Linear Layers: 0.026162 s (15.49%)
+  - MHA Attention: 0.008815 s (5.22%)
+  - Nonlinear Ops: 0.021276 s (12.60%)
+  - Classifier: 0.002737 s (1.62%)
+
+--- Prefill (Prompt) Phase Analysis ---
+Total: 0.148951 s
+Linear AI: 1110.3567
+Attention AI: 1529.7000
+Aggregate AI: 708.9658
+
+--- Decode (Generation) Phase Analysis ---
+Total: 0.019913 s
+Linear AI: 0.9996
+Attention AI: 3.9922
+Aggregate AI: 1.0519
+
+
+
+# LLaDA-8B-Instruct vs. LLaMA-3-8B-Instruct
+
+fixed prompt length, variable generation length
+
+* (python run_llada_roofline_model.py --input_prompt_length=128 --sequence_length=32 --block_length=32 --steps=16)
+==================================================
+LLaDA Theoretical Performance Analysis
+==================================================
+Mode: Non-Semi-Autoregressive
+Prompt: 128, Generation: 32, Total Steps: 16
+Blocks: 1, Block Length: 32, Steps per Block: 16
+
+--- Block-by-Block Analysis ---
+Block 1: SeqLen=160, Time/Step=21.0764 ms, Steps=16
+
+--------------------------------------------------
+--- Total Generation Analysis ---
+Total Estimated Runtime: 337.2217 ms
+Final Aggregate Arithmetic Intensity (AI): 138.8347
+
+
+* (python run_llama_roofline_model.py --input_prompt_length=160 --sequence_length=0)
+--- Total Runtime Breakdown ---
+Total Runtime: 0.022417 s
+  - FFN Linear Layers: 0.015417 s (68.77%)
+  - MHA Linear Layers: 0.003850 s (17.18%)
+  - MHA Attention: 0.000137 s (0.61%)
+  - Nonlinear Ops: 0.001645 s (7.34%)
+  - Classifier: 0.001368 s (6.10%)
+
+--- Prefill (Prompt) Phase Analysis ---
+Total: 0.022417 s
+Linear AI: 140.9876
+Attention AI: 113.7000
+Aggregate AI: 130.5025
+
+
+* (python run_llada_roofline_model.py --input_prompt_length=128 --sequence_length=128 --block_length=128 --steps=64)
+==================================================
+LLaDA Theoretical Performance Analysis
+==================================================
+Mode: Non-Semi-Autoregressive
+Prompt: 128, Generation: 128, Total Steps: 64
+Blocks: 1, Block Length: 128, Steps per Block: 64
+
+--- Block-by-Block Analysis ---
+Block 1: SeqLen=256, Time/Step=22.8178 ms, Steps=64
+
+--------------------------------------------------
+--- Total Generation Analysis ---
+Total Estimated Runtime: 1460.3394 ms
+Final Aggregate Arithmetic Intensity (AI): 205.9421
+
+
+* (python run_llama_roofline_model.py --input_prompt_length=256 --sequence_length=0)
+--- Total Runtime Breakdown ---
+Total Runtime: 0.024142 s
+  - FFN Linear Layers: 0.015860 s (65.69%)
+  - MHA Linear Layers: 0.004063 s (16.83%)
+  - MHA Attention: 0.000218 s (0.90%)
+  - Nonlinear Ops: 0.002632 s (10.90%)
+  - Classifier: 0.001368 s (5.67%)
+
+--- Prefill (Prompt) Phase Analysis ---
+Total: 0.024142 s
+Linear AI: 218.5981
+Attention AI: 185.7000
+Aggregate AI: 194.5236
+
+
+* (python run_llada_roofline_model.py --input_prompt_length=128 --sequence_length=512 --block_length=512 --steps=256)
+==================================================
+LLaDA Theoretical Performance Analysis
+==================================================
+Mode: Non-Semi-Autoregressive
+Prompt: 128, Generation: 512, Total Steps: 256
+Blocks: 1, Block Length: 512, Steps per Block: 256
+
+--- Block-by-Block Analysis ---
+Block 1: SeqLen=640, Time/Step=44.0926 ms, Steps=256
+
+--------------------------------------------------
+--- Total Generation Analysis ---
+Total Estimated Runtime: 11287.7037 ms
+Final Aggregate Arithmetic Intensity (AI): 400.2126
+
+
+* (python run_llama_roofline_model.py --input_prompt_length=640 --sequence_length=0)
+--- Total Runtime Breakdown ---
+Total Runtime: 0.045610 s
+  - FFN Linear Layers: 0.029747 s (65.22%)
+  - MHA Linear Layers: 0.007083 s (15.53%)
+  - MHA Attention: 0.000819 s (1.80%)
+  - Nonlinear Ops: 0.006593 s (14.45%)
+  - Classifier: 0.001368 s (3.00%)
+
+--- Prefill (Prompt) Phase Analysis ---
+Total: 0.045610 s
+Linear AI: 486.4999
+Attention AI: 473.7000
+Aggregate AI: 383.3396
+
+
+* (python run_llada_roofline_model.py --input_prompt_length=128 --sequence_length=2048 --block_length=2048 --steps=1024)
+==================================================
+LLaDA Theoretical Performance Analysis
+==================================================
+Mode: Non-Semi-Autoregressive
+Prompt: 128, Generation: 2048, Total Steps: 1024
+Blocks: 1, Block Length: 2048, Steps per Block: 1024
+
+--- Block-by-Block Analysis ---
+Block 1: SeqLen=2176, Time/Step=157.3615 ms, Steps=1024
+
+--------------------------------------------------
+--- Total Generation Analysis ---
+Total Estimated Runtime: 161138.1514 ms
+Final Aggregate Arithmetic Intensity (AI): 743.0780
+
+
+* (python run_llama_roofline_model.py --input_prompt_length=2176 --sequence_length=0)
+--- Total Runtime Breakdown ---
+Total Runtime: 0.158756 s
+  - FFN Linear Layers: 0.101139 s (63.71%)
+  - MHA Linear Layers: 0.024081 s (15.17%)
+  - MHA Attention: 0.009558 s (6.02%)
+  - Nonlinear Ops: 0.022610 s (14.24%)
+  - Classifier: 0.001368 s (0.86%)
+
+--- Prefill (Prompt) Phase Analysis ---
+Total: 0.158756 s
+Linear AI: 1149.7826
+Attention AI: 1625.7000
+Aggregate AI: 726.7953
+
+
+# LLaDA-8B-Instruct ablation study
+
+fixed prompt length 128, fixed sequence length 512
+different block size 512, 256, 128, 64, 32
+
+* (python run_llada_roofline_model.py --input_prompt_length=128 --sequence_length=512 --block_length=512 --steps=256)
+==================================================
+LLaDA Theoretical Performance Analysis
+==================================================
+Mode: Non-Semi-Autoregressive
+Prompt: 128, Generation: 512, Total Steps: 256
+Blocks: 1, Block Length: 512, Steps per Block: 256
+
+--- Block-by-Block Analysis ---
+Block 1: SeqLen=640, Time/Step=44.0926 ms, Steps=256
+
+--------------------------------------------------
+--- Total Generation Analysis ---
+Total Estimated Runtime: 11287.7037 ms
+Final Aggregate Arithmetic Intensity (AI): 400.2126
+
+
+* (python run_llada_roofline_model.py --input_prompt_length=128 --sequence_length=512 --block_length=256 --steps=256)
+==================================================
+LLaDA Theoretical Performance Analysis
+==================================================
+Mode: Semi-Autoregressive
+Prompt: 128, Generation: 512, Total Steps: 256
+Blocks: 2, Block Length: 256, Steps per Block: 128
+
+--- Block-by-Block Analysis ---
+Block 1: SeqLen=384, Time/Step=26.4426 ms, Steps=128
+Block 2: SeqLen=640, Time/Step=44.0926 ms, Steps=128
+
+--------------------------------------------------
+--- Total Generation Analysis ---
+Total Estimated Runtime: 9028.5001 ms
+Final Aggregate Arithmetic Intensity (AI): 345.9858
+
+
+* (python run_llada_roofline_model.py --input_prompt_length=128 --sequence_length=512 --block_length=128 --steps=256)
+==================================================
+LLaDA Theoretical Performance Analysis
+==================================================
+Mode: Semi-Autoregressive
+Prompt: 128, Generation: 512, Total Steps: 256
+Blocks: 4, Block Length: 128, Steps per Block: 64
+
+--- Block-by-Block Analysis ---
+Block 1: SeqLen=256, Time/Step=22.8178 ms, Steps=64
+Block 2: SeqLen=384, Time/Step=26.4426 ms, Steps=64
+Block 3: SeqLen=512, Time/Step=35.2607 ms, Steps=64
+Block 4: SeqLen=640, Time/Step=44.0926 ms, Steps=64
+
+--------------------------------------------------
+--- Total Generation Analysis ---
+Total Estimated Runtime: 8231.2754 ms
+Final Aggregate Arithmetic Intensity (AI): 315.4992
+
+
+* (python run_llada_roofline_model.py --input_prompt_length=128 --sequence_length=512 --block_length=64 --steps=256)
+==================================================
+LLaDA Theoretical Performance Analysis
+==================================================
+Mode: Semi-Autoregressive
+Prompt: 128, Generation: 512, Total Steps: 256
+Blocks: 8, Block Length: 64, Steps per Block: 32
+
+--- Block-by-Block Analysis ---
+Block 1: SeqLen=192, Time/Step=21.6567 ms, Steps=32
+Block 2: SeqLen=256, Time/Step=22.8178 ms, Steps=32
+Block 3: SeqLen=320, Time/Step=23.9795 ms, Steps=32
+Block 4: SeqLen=384, Time/Step=26.4426 ms, Steps=32
+Block 5: SeqLen=448, Time/Step=30.8514 ms, Steps=32
+Block 6: SeqLen=512, Time/Step=35.2607 ms, Steps=32
+Block 7: SeqLen=576, Time/Step=39.6706 ms, Steps=32
+Block 8: SeqLen=640, Time/Step=44.0926 ms, Steps=32
+
+--------------------------------------------------
+--- Total Generation Analysis ---
+Total Estimated Runtime: 7832.6984 ms
+Final Aggregate Arithmetic Intensity (AI): 299.2796
+
+
+* (python run_llada_roofline_model.py --input_prompt_length=128 --sequence_length=512 --block_length=32 --steps=256)
+==================================================
+LLaDA Theoretical Performance Analysis
+==================================================
+Mode: Semi-Autoregressive
+Prompt: 128, Generation: 512, Total Steps: 256
+Blocks: 16, Block Length: 32, Steps per Block: 16
+
+--- Block-by-Block Analysis ---
+Block 1: SeqLen=160, Time/Step=21.0764 ms, Steps=16
+Block 2: SeqLen=192, Time/Step=21.6567 ms, Steps=16
+Block 3: SeqLen=224, Time/Step=22.2372 ms, Steps=16
+Block 4: SeqLen=256, Time/Step=22.8178 ms, Steps=16
+Block 5: SeqLen=288, Time/Step=23.3986 ms, Steps=16
+Block 6: SeqLen=320, Time/Step=23.9795 ms, Steps=16
+Block 7: SeqLen=352, Time/Step=24.5605 ms, Steps=16
+Block 8: SeqLen=384, Time/Step=26.4426 ms, Steps=16
+Block 9: SeqLen=416, Time/Step=28.6469 ms, Steps=16
+Block 10: SeqLen=448, Time/Step=30.8514 ms, Steps=16
+Block 11: SeqLen=480, Time/Step=33.0560 ms, Steps=16
+Block 12: SeqLen=512, Time/Step=35.2607 ms, Steps=16
+Block 13: SeqLen=544, Time/Step=37.4656 ms, Steps=16
+Block 14: SeqLen=576, Time/Step=39.6706 ms, Steps=16
+Block 15: SeqLen=608, Time/Step=41.8758 ms, Steps=16
+Block 16: SeqLen=640, Time/Step=44.0926 ms, Steps=16
+
+--------------------------------------------------
+--- Total Generation Analysis ---
+Total Estimated Runtime: 7633.4187 ms
+Final Aggregate Arithmetic Intensity (AI): 290.9062

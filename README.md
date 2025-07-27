@@ -47,6 +47,20 @@ This will perform a runtime profiling of LLaDA-8B-Instruct and LLaMA-3-8B-Instru
 python run_llm_runtime_profile.py
 ```
 
+This will perform a roofline profiling of LLaMA-3-8B-Instruct:
+
+```bash
+python run_llama_roofline_model.py --input_prompt_length=2048 --sequence_length=0 # e.g. prefill
+```
+
+This will perform a roofline profiling of LLaDA-8B-Instruct:
+
+```bash
+python run_llada_roofline_model.py --input_prompt_length=128 --sequence_length=32 --block_length=32 --steps=16
+```
+
+To visualize the results, see `ai_profile/` and `runtime_profile/` folders.
+
 ---
 
 ## 5. Run the Chat Interface (Terminal)
